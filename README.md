@@ -148,12 +148,6 @@ root@d88a6e5973de:/# exit
 
 ### Run the Inventory application
 
-- To test the unit tests for the inventory application, run the below command.
-
-```
-appsody test
-```
-
 - To run the inventory application, run the below command.
 
 ```
