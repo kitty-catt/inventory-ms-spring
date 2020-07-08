@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ cat .Release.Name "-" .Chart.Name "-populate-mysql-" (randAlphaNum 5 | lower) | nospace | trunc 63 }}
+  labels:
+    {{- include "inventory.labels" . | indent 4 }}
+spec:
+  template:
+    metadata:
+      name: {{ cat .Release.Name "-" .Chart.Name "-populate-mysql-" (randAlphaNum 5 | lower) | nospace }}
+      labels:
+        {{- include "inventory.labels" . | indent 8 }}
+    spec:
+      restartPolicy: Never
+      initContainers:
+      {{- include "inventory.mysql.initcontainer" . | indent 6 }}
+      containers:
+      - name: populate-mysql
+        image: {{ .Values.mysql.image }}:{{ .Values.mysql.imageTag }}
+        imagePullPolicy: {{ .Values.mysql.imagePullPolicy }}
+        volumeMounts:
+        - mountPath: /config
+          name: config
+          readOnly: true
+        - mountPath: /db-data
+          name: db-data
+        command: ["/bin/bash", "-c"]
+        {{- if or .Values.mysql.password .Values.mysql.existingSecret }}
+        args: ["cp /config/mysql_data.sql /db-data; sed -i \"s/inventorydb/${MYSQL_DATABASE}/g\" /db-data/mysql_data.sql; until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER} -p${MYSQL_PASSWORD} </db-data/mysql_data.sql; do echo \"waiting for mysql\"; sleep 1; done; echo \"Loaded data into database\";"]
+        {{- else }}
+        args: ["cp /config/mysql_data.sql /db-data; sed -i \"s/inventorydb/${MYSQL_DATABASE}/g\" /db-data/mysql_data.sql; until mysql -h ${MYSQL_HOST} -P ${MYSQL_PORT} -u${MYSQL_USER}                     </db-data/mysql_data.sql; do echo \"waiting for mysql\"; sleep 1; done; echo \"Loaded data into database\";"]
+        {{- end }}
+        resources:
+        {{- include "inventory.resources" . | indent 10 }}
+        securityContext:
+        {{- include "inventory.securityContext" . | indent 10 }}
+        env:
+        {{- include "inventory.mysql.environmentvariables" . | indent 8 }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ template "inventory.fullname" . }}-data
+      - name: db-data
+        emptyDir:
+          medium: "Memory"
