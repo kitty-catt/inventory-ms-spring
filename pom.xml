@@ -3,14 +3,14 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-<!--
+<!-- the parent pom is there for a reason -->
   <parent>
     <groupId>dev.appsody</groupId>
     <artifactId>spring-boot2-stack</artifactId>
     <version>[0.3, 0.4)</version>
     <relativePath/>
   </parent>
--->
+
 
   <groupId>dev.appsody</groupId>
   <artifactId>inventory-application</artifactId>
