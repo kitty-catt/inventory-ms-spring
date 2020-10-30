@@ -51,7 +51,7 @@ public class InventoryController {
 	@GetMapping("/inventory")
 	@ResponseBody 
 	public Iterable<Inventory> getInventory() {
-		System.out.println("/inventory - version 0.1");
+		System.out.println("/inventory - version 0.2 - 2020-10-30 09:52");
 		return itemsRepo.findAll();
 	}
 
